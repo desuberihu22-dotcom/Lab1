@@ -95,13 +95,6 @@ public class BinarySearchTreeTest {
         public void testDuplicates() {
                 bst.addElement(5);
                 bst.addElement(5);
-                // Depending on implementation, duplicates might be ignored or added.
-                // The current implementation adds duplicates to the right (comparison >= 0
-                // check in recursiveAdd?)
-                // Let's check the code:
-                // if (comparison < 0) left... else if (comparison > 0) right...
-                // It does NOT handle comparison == 0, so it does nothing!
-                // So size should remain 1.
 
                 assertEquals(1, bst.size(),
                                 "Adding duplicate should not increase size (based on current implementation)");

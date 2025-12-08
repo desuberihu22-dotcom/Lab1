@@ -1,53 +1,90 @@
 package se.hig.aod.lab1;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 public class Benchmark {
-
         public static void main(String[] args) {
-                int[] sizes = { 100, 1000, 5000, 10000, 20000 };
-                int numberOfSearches = 1000;
+                ArrayList<Integer> allData = null;
+                try {
+                        allData = loadDataFromFile("Lab1/Data/unique_integers.txt");
+                } catch (IOException e) {
+                        System.err.println("Error loading data file: " + e.getMessage());
+                        return;
+                }
+                int numberOfSearches = 10000;
+                int[] sizes = { 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
 
-                System.out.println("Benchmark: BinarySearchTree vs ArrayList (Search Performance)");
-                System.out.println("-------------------------------------------------------------");
-                System.out.printf("%-10s | %-15s | %-15s%n", "Size", "BST (ns)", "ArrayList (ns)");
-                System.out.println("-------------------------------------------------------------");
+                String l = "%-9s|";
+
+                System.out.printf(l + l + l + " (Time in nanosecounds)\n", "Size", "BST     ", "ArrayList");
+
+                Random random = new Random();
+                int[] searchKeys = new int[numberOfSearches];
+                int maxActualSize = Math.min(sizes[sizes.length - 1], allData.size());
+
+                for (int i = 0; i < numberOfSearches; i++) {
+                        if (i % 2 == 0 && maxActualSize > 0) {
+                                searchKeys[i] = allData.get(random.nextInt(maxActualSize));
+                        } else {
+                                searchKeys[i] = random.nextInt(Integer.MAX_VALUE);
+                        }
+                }
 
                 for (int size : sizes) {
-                        runBenchmark(size, numberOfSearches);
+                        runBenchmark(size, numberOfSearches, allData, searchKeys);
                 }
         }
 
-        private static void runBenchmark(int size, int numberOfSearches) {
+        private static void runBenchmark(int size, int numberOfSearches, ArrayList<Integer> dataSource, int[] searchKeys) {
                 BinarySearchTree<Integer> bst = new BinarySearchTree<>();
                 ArrayList<Integer> arrayList = new ArrayList<>();
-                Random random = new Random();
 
-                int[] data = new int[size];
-                for (int i = 0; i < size; i++) {
-                        data[i] = random.nextInt(size * 10);
-                        bst.addElement(data[i]);
-                        arrayList.add(data[i]);
-                }
+                int actualSize = Math.min(size, dataSource.size());
 
-                int[] searchKeys = new int[numberOfSearches];
-                for (int i = 0; i < numberOfSearches; i++) {
-                        searchKeys[i] = random.nextInt(size * 10);
+                for (int i = 0; i < actualSize; i++) {
+                        int value = dataSource.get(i);
+                        bst.addElement(value);
+                        arrayList.add(value);
                 }
 
                 long startTime = System.nanoTime();
                 for (int key : searchKeys) {
                         bst.searchElement(key);
                 }
-                long bstDuration = (System.nanoTime() - startTime) / numberOfSearches;
+                long stopTime = System.nanoTime();
+                long bstDuration = (stopTime - startTime) / numberOfSearches;
 
                 startTime = System.nanoTime();
                 for (int key : searchKeys) {
                         arrayList.contains(key);
                 }
-                long listDuration = (System.nanoTime() - startTime) / numberOfSearches;
+                long stopTime2 = System.nanoTime();
+                long listDuration = (stopTime2 - startTime) / numberOfSearches;
 
-                System.out.printf("%-10d | %-15d | %-15d%n", size, bstDuration, listDuration);
+                String l = "%-9d |";
+
+                System.out.printf(l + l + l + "\n", actualSize, bstDuration, listDuration);
+        }
+
+        private static ArrayList<Integer> loadDataFromFile(String filename) throws IOException {
+                ArrayList<Integer> data = new ArrayList<>();
+                BufferedReader reader = new BufferedReader(new FileReader(filename));
+
+                String line = reader.readLine();
+
+                while (line != null) {
+                        line = line.trim();
+                        if (!line.isEmpty()) {
+                                try {
+                                        data.add(Integer.parseInt(line));
+                                } catch (NumberFormatException e) {
+                                }
+                        }
+                        line = reader.readLine();
+                }
+                reader.close();
+                System.out.println("Loaded " + data.size() + " integers from " + filename + "\n");
+                return data;
         }
 }

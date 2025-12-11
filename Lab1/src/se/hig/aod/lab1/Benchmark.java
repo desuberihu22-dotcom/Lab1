@@ -13,7 +13,7 @@ public class Benchmark {
                         return;
                 }
                 int numberOfSearches = 10000;
-                int[] sizes = { 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
+                int[] sizes = { 10000, 20000,40000, 80000, 160000, 320000, 640000, 1280000, 2560000};
 
                 String l = "%-9s|";
 
